@@ -1,0 +1,70 @@
+name: Sync with upstream
+
+on:
+  schedule:
+    # 每天凌晨 6 点执行同步任务
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update system and certificates
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates
+        continue-on-error: true # 若更新失败，继续执行后续步骤
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Add upstream repo if not exists
+        run: |
+          if ! git remote | grep -q upstream; then
+            echo "Adding upstream repository..."
+            git remote add upstream https://github.com/projectdiscovery/nuclei-templates.git
+          else
+            echo "Upstream repository already exists."
+          fi
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "Alan10991"  # 替换为你的 GitHub 用户名
+          git config user.email "Alan10991@proton.me"  # 替换为你的 GitHub 邮箱
+        env:
+          GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
+          GITHUB_EMAIL: ${{ secrets.GITHUB_EMAIL }}
+
+      - name: Fetch upstream changes
+        run: |
+          echo "Fetching changes from upstream..."
+          git fetch upstream
+          if [ $? -ne 0 ]; then
+            echo "Failed to fetch upstream changes"
+            exit 1
+          fi
+
+      - name: Merge upstream changes
+        run: |
+          echo "Merging upstream changes..."
+          git merge upstream/main
+          if [ $? -ne 0 ]; then
+            echo "Failed to merge upstream changes"
+            git merge --abort
+            exit 1
+          fi
+
+      - name: Push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Pushing changes to origin..."
+          git push origin main
+          if [ $? -ne 0 ]; then
+            echo "Failed to push changes to origin"
+            exit 1
+          fi
