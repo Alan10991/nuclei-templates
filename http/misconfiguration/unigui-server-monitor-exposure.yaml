@@ -33,4 +33,4 @@ http:
           - 'contains(body, "layout:\"fit\",title:\"uniGUI Standalone Server\"")'
           - 'contains(body, "layout:\"absolute\",title:\"Server Statistics\"")'
         condition: or
-# digest: 4a0a0047304502204c229e32b0d0e3246224e79f73af2c0dbf3ebfd8fa093110bc2798c86ba89edc022100fc214db1ebb8724ddd1cb65d140ca64b6e533567b296fcb4be7e6cbf82b7c4a9:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a00473045022100f40958b047558f39873b1c67f9061fcef9cbe65c1dec42722aa5c945ccb69ce40220354c7681d4ded7b41bdfe0eca5c7a4dc53093c346fd16d7ee53a715d6648e9b6:922c64590222798bb761d5b6d8e72950
