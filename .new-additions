@@ -1,3 +1,5 @@
+http/cves/2022/CVE-2022-1711.yaml
+http/cves/2022/CVE-2022-26585.yaml
 http/cves/2024/CVE-2024-21136.yaml
 http/cves/2024/CVE-2024-21641.yaml
 http/cves/2024/CVE-2024-51739.yaml
@@ -11,6 +13,7 @@ http/exposed-panels/hoppscotch-panel.yaml
 http/exposed-panels/netscaler-console-panel.yaml
 http/exposed-panels/yacht-panel.yaml
 http/iot/emerson-intellislot-webcard.yaml
+http/miscellaneous/trust-center-detect.yaml
 http/technologies/luxtrust-cosi-detect.yaml
 http/technologies/streamlit-detect.yaml
 http/technologies/wordpress/plugins/gosmtp.yaml
