@@ -1,23 +1,23 @@
-id: wordpress-so-widgets-bundle
+id: wordpress-blocksy-companion
 
 info:
-  name: SiteOrigin Widgets Bundle Detection
+  name: Blocksy Companion Detection
   author: ricardomaia
   severity: info
   reference:
-    - https://wordpress.org/plugins/so-widgets-bundle/
+    - https://wordpress.org/plugins/blocksy-companion/
   metadata:
-    plugin_namespace: so-widgets-bundle
-    wpscan: https://wpscan.com/plugin/so-widgets-bundle
+    plugin_namespace: blocksy-companion
+    wpscan: https://wpscan.com/plugin/blocksy-companion
   tags: tech,wordpress,wp-plugin,top-200
 
 http:
   - method: GET
     path:
-      - "{{BaseURL}}/wp-content/plugins/so-widgets-bundle/readme.txt"
+      - "{{BaseURL}}/wp-content/plugins/blocksy-companion/readme.txt"
 
     payloads:
-      last_version: helpers/wordpress/plugins/so-widgets-bundle.txt
+      last_version: helpers/wordpress/plugins/blocksy-companion.txt
 
     extractors:
       - type: regex
@@ -46,4 +46,3 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 490a00463044022001e21526114e25a3e668a4dd9f0836400920ee890366883d175e82652aa834be0220365954d426549493ae8f4aecfcf6d7c10433d00df4ec7417d1542c9efc5ca539:922c64590222798bb761d5b6d8e72950
